@@ -1,0 +1,12 @@
+[project]
+name = "common"
+version = "0.1.0"
+description = "Shared utilities for A2A agents"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["server", "client", "utils", "types", "common"]

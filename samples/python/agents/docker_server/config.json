@@ -1,0 +1,13 @@
+{
+  "desktop-commander": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@smithery/cli@latest",
+      "run",
+      "@wonderwhy-er/desktop-commander",
+      "--key",
+      "e538a05f-f1fb-446f-9138-c9fb115eb82a"
+    ]
+  }
+}

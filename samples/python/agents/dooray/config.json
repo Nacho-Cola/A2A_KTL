@@ -1,0 +1,16 @@
+{
+  "Dooray": {
+    "command": "python",
+    "args": [
+      "./servers/dooray_server.py"
+    ],
+    "transport": "stdio"
+  },
+  "Local_time": {
+    "command": "python",
+    "args": [
+      "./servers/time_server.py"
+    ],
+    "transport": "stdio"
+  }
+}
