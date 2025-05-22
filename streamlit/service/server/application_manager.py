@@ -1,3 +1,5 @@
+#/service/server/application_manager.py
+
 from abc import ABC, abstractmethod
 
 from common.types import AgentCard, Message, Task
@@ -18,7 +20,7 @@ class ApplicationManager(ABC):
         pass
 
     @abstractmethod
-    def register_agent(self, url: str):
+    async def register_agent(self, url: str):
         pass
 
     @abstractmethod
