@@ -18,7 +18,9 @@ from agents.dooray.agent import DoorayAgent
 from agents.dooray.task_manager import AgentTaskManager
 
 from dotenv import load_dotenv
-load_dotenv(override=True)
+load_dotenv( override=True)
+print("GOOGLE_API_KEY =", os.getenv("GOOGLE_API_KEY"))
+print("TAVILY_API_KEY =", os.getenv("TAVILY_API_KEY"))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -62,7 +64,7 @@ async def async_main(host, port):
       "TAVILY_API_KEY"
       ])
 
-    mcp_config = load_config_from_json()
+    mcp_config = load_config_from_json("./agents/dooray/config.json")
     agent = DoorayAgent(
       model_type="claude-3-5-sonnet-latest",  # 명시적으로 선택
       use_mcp=True,

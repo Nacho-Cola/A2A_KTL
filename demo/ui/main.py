@@ -9,9 +9,10 @@ import mesop as me
 
 from components.api_key_dialog import api_key_dialog
 from components.page_scaffold import page_scaffold
-from dotenv import load_dotenv
+
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.wsgi import WSGIMiddleware
+
 from pages.agent_list import agent_list_page
 from pages.conversation import conversation_page
 from pages.event_list import event_list_page
@@ -22,9 +23,8 @@ from service.server.server import ConversationServer
 from state import host_agent_service
 from state.state import AppState
 
-
-load_dotenv()
-
+from dotenv import load_dotenv
+load_dotenv(override=True)
 
 def on_load(e: me.LoadEvent):  # pylint: disable=unused-argument
     """On load event"""
@@ -154,7 +154,7 @@ if __name__ == '__main__':
 
     # Setup the connection details, these should be set in the environment
     host = os.environ.get('A2A_UI_HOST', '0.0.0.0')
-    port = int(os.environ.get('A2A_UI_PORT', '12000'))
+    port = int(os.environ.get('A2A_UI_PORT', '12001'))
 
     # Set the client to talk to the server
     host_agent_service.server_url = f'http://{host}:{port}'

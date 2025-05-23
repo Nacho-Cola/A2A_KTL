@@ -60,7 +60,7 @@ async def async_main(host, port):
       "TAVILY_API_KEY"
       ])
 
-    mcp_config = load_config_from_json()
+    mcp_config = load_config_from_json("./agents/docker_server/config.json")
     agent = DockerAgent(
       model_type="claude-3-5-sonnet-latest",  # 명시적으로 선택
       use_mcp=True,

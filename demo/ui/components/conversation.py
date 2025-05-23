@@ -133,7 +133,7 @@ def conversation():
             )
         ):
             me.input(
-                label='How can I help you?',
+                label='어떻게 도와드릴까요?',
                 on_blur=on_blur,
                 on_enter=send_message_enter,
                 style=me.Style(min_width='80vw'),
