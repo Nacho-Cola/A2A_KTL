@@ -5,7 +5,6 @@ from typing import Any, Dict, Optional, Type, TypeVar # 타입 힌팅 개선
 import httpx
 
 # service.types 경로는 프로젝트 구조에 맞게 설정되어 있다고 가정합니다.
-# demo/ui/service/types.py 를 사용한다고 가정
 from service.types import (
     AgentClientHTTPError,
     AgentClientJSONError,
@@ -40,7 +39,7 @@ class ConversationClient:
     """
     ConversationServer와 상호작용하기 위한 비동기 클라이언트입니다.
     """
-    def __init__(self, base_url: str, timeout: float = 10.0): # 타임아웃 기본값 추가
+    def __init__(self, base_url: str, timeout: float = 300.0): # 타임아웃 기본값 추가
         self.base_url = base_url.rstrip('/')
         # httpx.AsyncClient 인스턴스를 생성하여 재사용합니다.
         # base_url을 여기에 설정하면, 이후 요청 시에는 상대 경로만 사용합니다.
@@ -51,8 +50,8 @@ class ConversationClient:
         self, request_model: JSONRPCRequest, response_model_class: Type[TResponse]
     ) -> TResponse:
         # API 접두사 추가
-        api_prefix = "/api/v1" 
-        method_path = api_prefix.rstrip('/') + '/' + request_model.method.lstrip('/')
+
+        method_path = request_model.method.lstrip('/')
         
         payload_dict = request_model.model_dump(exclude_none=True)
         """

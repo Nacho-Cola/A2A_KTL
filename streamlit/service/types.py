@@ -1,4 +1,4 @@
-from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Union # Any, Dict, List, Union 추가
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field, TypeAdapter
 
@@ -24,7 +24,6 @@ class Conversation(BaseModel):
 class Event(BaseModel):
     id: str
     actor: str = Field(default='', description="이벤트를 발생시킨 주체 (예: 'user', 'agent', 'system')")
-    # TODO: 모델 내부 개념(예: 함수 호출)을 지원하도록 확장 필요
     content: Message # 이벤트 내용은 Message 객체로 표현
     timestamp: float = Field(description="이벤트 발생 Unix 타임스탬프 (UTC)")
 
@@ -43,20 +42,20 @@ class ListMessageResponse(JSONRPCResponse):
     result: Optional[List[Message]] = Field(default=None, description="메시지 목록 또는 없음")
 
 
-class MessageInfo(BaseModel):
+class MessageInfo(BaseModel): # 이 모델은 SendMessageResponse에서 직접 사용되지 않을 수 있음
     message_id: str
     conversation_id: str
+    task_id: Optional[str] = None # task_id를 포함할 수 있도록 확장 (선택적)
 
 
 class SendMessageResponse(JSONRPCResponse):
-    # 메시지 전송 결과로 전체 메시지 객체 또는 간략한 정보(ID 등)를 반환할 수 있음
-    result: Optional[Union[Message, MessageInfo]] = Field(default=None)
+    # server.py에서 task_id를 포함한 Dict를 반환하므로, result 타입을 Dict로 변경
+    result: Optional[Dict[str, Any]] = Field(default=None, description="메시지 전송 결과 (message_id, conversation_id, task_id 포함 가능)")
 
 
 class GetEventRequest(JSONRPCRequest):
     method: Literal['events/get'] = 'events/get'
-    # params: Optional[Dict[str, Any]] = Field(default_factory=dict, description="이벤트 필터링 조건 (예: conversation_id)")
-    # 현재는 params가 없으므로, 필요시 위와 같이 추가
+    # params: Optional[Dict[str, Any]] = Field(default_factory=dict) # 필요시 추가
 
 
 class GetEventResponse(JSONRPCResponse):
@@ -65,7 +64,7 @@ class GetEventResponse(JSONRPCResponse):
 
 class ListConversationRequest(JSONRPCRequest):
     method: Literal['conversation/list'] = 'conversation/list'
-    # params: Optional[Dict[str, Any]] = Field(default_factory=dict, description="대화 목록 필터링 조건")
+    # params: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class ListConversationResponse(JSONRPCResponse):
@@ -74,13 +73,10 @@ class ListConversationResponse(JSONRPCResponse):
 
 class PendingMessageRequest(JSONRPCRequest):
     method: Literal['message/pending'] = 'message/pending'
-    # params: Optional[Dict[str, Any]] = Field(default_factory=dict, description="처리 중 메시지 필터링 조건")
+    # params: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class PendingMessageResponse(JSONRPCResponse):
-    # ADKHostManager는 List[Tuple[str, str]]을, InMemoryFakeAgentManager는 List[str]을 반환.
-    # ApplicationManager 인터페이스는 List[str]을 정의.
-    # 여기서는 ADKHostManager의 반환 타입을 따르지만, 전반적인 일관성 확보 필요.
     result: Optional[List[Tuple[str, str]]] = Field(default=None, description="처리 중인 메시지 정보 목록 (message_id, status_string) 또는 없음")
 
 
@@ -95,7 +91,7 @@ class CreateConversationResponse(JSONRPCResponse):
 
 class ListTaskRequest(JSONRPCRequest):
     method: Literal['task/list'] = 'task/list'
-    # params: Optional[Dict[str, Any]] = Field(default_factory=dict, description="태스크 목록 필터링 조건")
+    # params: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class ListTaskResponse(JSONRPCResponse):
@@ -104,49 +100,47 @@ class ListTaskResponse(JSONRPCResponse):
 
 class RegisterAgentRequest(JSONRPCRequest):
     method: Literal['agent/register'] = 'agent/register'
-    params: Optional[str] = Field(default=None, description="등록할 에이전트 카드 정보 URL") # 원본에서는 str | None
+    params: Optional[str] = Field(default=None, description="등록할 에이전트 카드 정보 URL")
 
 
 class RegisterAgentResponse(JSONRPCResponse):
-    # result는 성공 여부 또는 등록된 에이전트 정보 등을 나타낼 수 있음.
-    # 원본에서는 result: str | None = None. 에이전트 ID나 성공 메시지 문자열로 가정.
     result: Optional[str] = Field(default=None, description="등록 결과 (예: 에이전트 ID 또는 성공 메시지) 또는 없음")
-    # error 필드는 Base JSONRPCResponse 에서 상속받아 사용 (common.types.JSONRPCResponse 정의에 따름)
 
 
-# UnregisterAgentRequest: JSONRPCRequest를 상속하도록 변경
 class UnregisterAgentRequest(JSONRPCRequest):
     method: Literal['agent/unregister'] = 'agent/unregister'
     params: str = Field(description="등록 해제할 에이전트의 URL")
 
 
-# UnregisterAgentResponse: JSONRPCResponse를 상속하고 result 필드를 갖도록 변경
 class UnregisterAgentResponse(JSONRPCResponse):
     result: Optional[bool] = Field(default=True, description="등록 해제 성공 여부 (기본값: True)")
-    # error 필드는 Base JSONRPCResponse 에서 상속받아 사용 (common.types.JSONRPCResponse 정의에 따름)
-    # 만약 common.types.JSONRPCResponse에 error 필드가 없다면, 여기에 직접 정의:
-    # error: Optional[str] = Field(default=None, description="오류 발생 시 메시지")
 
 
 class ListAgentRequest(JSONRPCRequest):
     method: Literal['agent/list'] = 'agent/list'
-    params: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    params: Optional[Dict[str, Any]] = Field(default_factory=dict) # params가 있을 수 있으므로 정의
 
-# AgentRequest TypeAdapter: 여러 요청 타입을 판별하여 처리할 때 사용 가능
-# 현재 SendMessageRequest와 ListConversationRequest만 포함되어 있음. 필요시 확장.
+
+class ListAgentResponse(JSONRPCResponse): # 이전에 누락되었던 ListAgentResponse 정의
+    result: Optional[List[AgentCard]] = Field(default=None, description="에이전트 카드 목록 또는 없음")
+
+
+# AgentRequestUnion 정의 시점에 모든 관련 모델이 위에 정의되어 있어야 함
+_request_models_for_union = (
+    SendMessageRequest,
+    ListConversationRequest,
+    ListMessageRequest,
+    GetEventRequest,
+    PendingMessageRequest,
+    CreateConversationRequest,
+    ListTaskRequest,
+    RegisterAgentRequest,
+    UnregisterAgentRequest,
+    ListAgentRequest,
+)
+
 AgentRequestUnion = Annotated[
-    Union[
-        'SendMessageRequest', # 문자열로 변경
-        'ListConversationRequest', # 문자열로 변경
-        'ListMessageRequest', # 문자열로 변경
-        'GetEventRequest', # 문자열로 변경
-        'PendingMessageRequest', # 문자열로 변경
-        'CreateConversationRequest', # 문자열로 변경
-        'ListTaskRequest', # 문자열로 변경
-        'RegisterAgentRequest', # 문자열로 변경
-        'UnregisterAgentRequest', # 문자열로 변경
-        'ListAgentRequest', # 문자열로 변경
-    ],
+    Union[_request_models_for_union], # 문자열 대신 실제 타입 사용
     Field(discriminator='method'),
 ]
 AgentRequest = TypeAdapter(AgentRequestUnion)
@@ -160,19 +154,14 @@ class AgentClientError(Exception):
 
 class AgentClientHTTPError(AgentClientError):
     """HTTP 오류 발생 시 사용될 예외"""
-    def __init__(self, status_code: int, detail: str): # message -> detail로 변경 (FastAPI HTTPException과 유사하게)
+    def __init__(self, status_code: int, detail: str):
         self.status_code = status_code
-        self.detail = detail # 상세 오류 메시지
+        self.detail = detail 
         super().__init__(f'HTTP Error {status_code}: {detail}')
 
 
 class AgentClientJSONError(AgentClientError):
     """JSON 파싱 오류 발생 시 사용될 예외"""
-    def __init__(self, detail: str): # message -> detail로 변경
+    def __init__(self, detail: str):
         self.detail = detail
         super().__init__(f'JSON Decode Error: {detail}')
-
-
-
-class ListAgentResponse(JSONRPCResponse):
-    result: Optional[List[AgentCard]] = Field(default=None, description="에이전트 카드 목록 또는 없음")

@@ -8,9 +8,15 @@ from service.server.server import ConversationServer
 # ADKHostManager 직접 임포트는 ConversationServer가 내부적으로 처리하므로 여기서는 불필요할 수 있음
 # from streamlit.service.server.adk_host_manager import ADKHostManager
 
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 # 기본 로깅 설정
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+
 
 def create_app() -> FastAPI:
     """FastAPI 애플리케이션 인스턴스를 생성하고 설정합니다."""
@@ -24,7 +30,7 @@ def create_app() -> FastAPI:
     ConversationServer(router) # manager 인자 없이 생성하여 내부 로직 사용
 
     app = FastAPI(title="A2A Conversation Service", version="1.0.0")
-    app.include_router(router, prefix="/api/v1") # API 엔드포인트에 접두사 추가 (선택 사항)
+    app.include_router(router) # API 엔드포인트에 접두사 추가 (선택 사항)
     
     logger.info("FastAPI application created and router included.")
     return app

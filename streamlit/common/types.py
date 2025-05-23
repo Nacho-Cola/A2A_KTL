@@ -64,7 +64,7 @@ Part = Annotated[TextPart | FilePart | DataPart, Field(discriminator='type')]
 
 
 class Message(BaseModel):
-    role: Literal['user', 'agent']
+    role: Literal['user', 'agent', 'model']
     parts: list[Part]
     metadata: dict[str, Any] | None = None
 
@@ -370,3 +370,8 @@ class A2AClientJSONError(A2AClientError):
 
 class MissingAPIKeyError(Exception):
     """Exception for missing API key."""
+
+
+class AgentRegistrationError(Exception):
+    """Custom exception for agent registration failures."""
+    pass
